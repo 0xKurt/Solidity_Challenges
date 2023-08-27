@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract Challenge_NFT is ERC721, Ownable {
-
     using Counters for Counters.Counter;
+
     Counters.Counter private _tokenIdCounter;
 
     string public uri;
@@ -20,10 +20,10 @@ contract Challenge_NFT is ERC721, Ownable {
         uri = _uri;
     }
 
-    function mint(address to) external returns(uint256 tokenId) {
+    function mint(address to) external returns (uint256 tokenId) {
         tokenId = _tokenIdCounter.current();
 
-        require(challenge[tokenId] == msg.sender , "No active challenge");
+        require(challenge[tokenId] == msg.sender, "No active challenge");
         challenge[tokenId] = address(1);
 
         _tokenIdCounter.increment();
@@ -49,8 +49,17 @@ contract Challenge_NFT is ERC721, Ownable {
     }
 
     function setUri(string memory _uri) external onlyOwner {
-        if(keccak256(abi.encodePacked(uri)) == keccak256(abi.encodePacked("")))
+        if (keccak256(abi.encodePacked(uri)) == keccak256(abi.encodePacked(""))) {
             uri = _uri;
+        }
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
+        internal
+        override(ERC721)
+    {
+        require(from == address(0), "Token not transferable");
+        super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
     event Solved(uint256 indexed id, address solver);
